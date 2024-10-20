@@ -1,0 +1,6 @@
+def foo(a, b ,c ,d):
+    print("34")
+
+def bar(v, d):
+    if(v < 34):
+        print("v")

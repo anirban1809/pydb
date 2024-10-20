@@ -87,6 +87,33 @@ pub enum Token {
 use std::iter::Peekable;
 use std::str::Chars;
 
+fn clean_tokens(tokens: Vec<Token>) -> Vec<Token> {
+    let mut cleaned_tokens = Vec::new();
+    let mut prev_token: Option<Token> = None; // Track the previous token
+    let mut indent_level = 0; // Track the current indent level
+
+    for token in tokens {
+        match (&prev_token, &token) {
+            // Skip consecutive newlines
+            (Some(Token::Newline), Token::Newline) => continue,
+
+            // Handle unnecessary indent/dedent
+            (Some(Token::Newline), Token::Dedent) if indent_level == 0 => continue,
+            (Some(Token::Dedent), Token::Dedent) if indent_level == 0 => continue,
+
+            // Track indent level changes
+            (Some(Token::Indent), _) => indent_level += 1,
+            (Some(Token::Dedent), _) if indent_level > 0 => indent_level -= 1,
+
+            // Push valid tokens
+            _ => cleaned_tokens.push(token.clone()),
+        }
+        prev_token = Some(token); // Update previous token tracker
+    }
+
+    cleaned_tokens
+}
+
 pub fn tokenize(input: &str) -> Vec<Token> {
     let mut tokens = Vec::new();
     let mut chars = input.chars().peekable();
